@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>DIP 2018 Final Demo -- Palette</title>
+<link rel="stylesheet" href="demo.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="iro.min.js"></script>
+<script>
+function uploadimg() {
+	var preview = $('#image');
+	var file = $('input[type=file]').get(0).files[0];
+	var reader = new FileReader();
+	
+	reader.onloadend = function() {
+		preview.attr('src', reader.result);
+	};
+	
+	if(file) {
+		reader.readAsDataURL(file); //reads the data as a URL
+    }
+	else {
+		preview.attr('srt', "http://via.placeholder.com/640x480");
+    }
+}
+
+function start() {
+	var demoColorPicker = new iro.ColorPicker("#color-picker-container");
+	demoColorPicker.on("color:change", function() {
+		var rgb = demoColorPicker.color.hexString;
+		$('#image-container').css('background-color', rgb);
+	});
+	
+	$('#image-container').css('background-color', demoColorPicker.color.hexString);
+}
+</script>
+</head>
+<body onload="start()">
+	<div id="upload-bar">
+		<input type="file" id="myFile" multiple size="50" onchange="uploadimg()"></input>
+	</div>
+	<div id="content-containter">
+		<div id="image-container"><img id="image" src="http://via.placeholder.com/640x480"></div>
+		<div id="color-picker-container"></div>
+	</div>
+</body>
+</html>

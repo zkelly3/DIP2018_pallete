@@ -1,0 +1,15 @@
+#upload-bar {
+	height: 50px;
+	width: 1320px;
+	left: 20px;
+}
+#image-container {
+	height: 600px;
+	width: 1000px;
+	float: left;
+}
+#color-picker-container {
+	height: 320px;
+	width: 320px;
+	float: left;
+}
