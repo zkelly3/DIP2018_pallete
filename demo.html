@@ -6,16 +6,16 @@
 <link rel="stylesheet" href="demo.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="iro.min.js"></script>
+<script src="palleteFunctions.js"></script>
 <script>
 function uploadimg() {
 	var preview = $('#image');
 	var file = $('input[type=file]').get(0).files[0];
 	var reader = new FileReader();
-	
 	reader.onloadend = function() {
 		preview.attr('src', reader.result);
+		recalcPallete();
 	};
-	
 	if(file) {
 		reader.readAsDataURL(file); //reads the data as a URL
     }
@@ -30,7 +30,6 @@ function start() {
 		var rgb = demoColorPicker.color.hexString;
 		$('#image-container').css('background-color', rgb);
 	});
-	
 	$('#image-container').css('background-color', demoColorPicker.color.hexString);
 }
 </script>
@@ -43,5 +42,7 @@ function start() {
 		<div id="image-container"><img id="image" src="http://via.placeholder.com/640x480"></div>
 		<div id="color-picker-container"></div>
 	</div>
+	<div>Number of colors: <input type="number" min="1" max="10" value="5" onchange="recalcPallete()"></input></div>
+	<div id="pallete-container"><!-- to be filled color_sample classes by js --></div>
 </body>
 </html>

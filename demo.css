@@ -1,6 +1,11 @@
+div{
+	display: block;
+	overflow: auto;
+	padding: 5px;
+}
 #upload-bar {
 	height: 50px;
-	width: 1320px;
+	width: calc(100% - 20px);
 	left: 20px;
 }
 #image-container {
@@ -12,4 +17,21 @@
 	height: 320px;
 	width: 320px;
 	float: left;
+}
+.color_sample{
+	padding: 0px;
+	border-width: 2px;
+	border-style: solid;
+	border-radius: 5px;
+	width: 40px;
+	height: 20px;
+	transition-duration: 0.5s;
+	background-color: #FF0000;
+	border-color: rgb(50,50,50);
+	box-shadow: 0px 0px 0px grey;
+}
+.color_sample:hover {
+	border-color: rgb(200,200,200);
+	transform: translateY(-3px);
+	box-shadow: 0px 3px 5px grey;
 }
