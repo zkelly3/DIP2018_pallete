@@ -7,6 +7,7 @@ var imgData;
 var w, h;
 var kmeansLabV;
 var modLabV;
+var clickedColorIndex;
 
 function RGB2LAB(r,g,b){
 	//algorithm from https://cg2010studio.com/2012/10/02/rgb%E8%88%87cielab%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%96%93%E8%BD%89%E6%8F%9B/
@@ -204,6 +205,30 @@ function recalcPallete(){
 		itCount++;
 	}while(kmeansConverge != true)
 	console.log("iterations until converge = "+itCount);
+	//sort according to L value
+	for(var i = 1; i < numColors+1; i++){
+		var minInd = i, minL = kmeansLabV[i*3];
+		for(var j = i+1; j < numColors+1; j++){
+			if(kmeansLabV[j*3] < minL){
+				minL = kmeansLabV[j*3];
+				minInd = j;
+			}
+		}
+		if(minInd != i){
+			var tmpLab = [0,0,0];
+			tmpLab[0] = kmeansLabV[minInd*3];
+			tmpLab[1] = kmeansLabV[minInd*3+1];
+			tmpLab[2] = kmeansLabV[minInd*3+2];
+			kmeansLabV[minInd*3] = kmeansLabV[i*3];
+			kmeansLabV[minInd*3+1] = kmeansLabV[i*3+1];
+			kmeansLabV[minInd*3+2] = kmeansLabV[i*3+2];
+			kmeansLabV[i*3] = tmpLab[0];
+			kmeansLabV[i*3+1] = tmpLab[1];
+			kmeansLabV[i*3+2] = tmpLab[2];
+		}
+	}
+	modLabV = kmeansLabV.slice(0);
+	//add to html
 	for(var i = 1; i < numColors+1; i++){
 		var rgb = LAB2RGB(kmeansLabV[i*3],kmeansLabV[i*3+1],kmeansLabV[i*3+2]);
 		$('#cs_'+i).css('background-color', 'rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')');
@@ -214,10 +239,34 @@ function recalcPallete(){
 function clickOnColor(){
 	clickedColorID = $(this).attr('id');
 	demoColorPicker.color.rgbString = $(this).css('background-color');
+	clickedColorIndex = parseInt(clickedColorID.substring(3));
 }
 function modColor(){
 	if(weightIsDirty) calcWeight();
 	weightIsDirty = false;
+	var tmpLab = RGB2LAB(demoColorPicker.color.rgb.r,demoColorPicker.color.rgb.g,demoColorPicker.color.rgb.b);
+	//constraint Input
+	if(tmpLab[0] > modLabV[clickedColorIndex*3]){
+		for(var i = clickedColorIndex+1; i < numColors+1; i++){
+			if(modLabV[i*3]<tmpLab[0]){
+				modLabV[i*3]=tmpLab[0];
+				var tmpRgb = LAB2RGB(modLabV[i*3],modLabV[i*3+1],modLabV[i*3+2]);
+				$('#cs_'+i).css('background-color', 'rgb('+tmpRgb[0]+','+tmpRgb[1]+','+tmpRgb[2]+')');
+			}else break;
+		}
+	}else{
+		for(var i = clickedColorIndex-1; i > 0; i--){
+			if(modLabV[i*3]>tmpLab[0]){
+				modLabV[i*3]=tmpLab[0];
+				var tmpRgb = LAB2RGB(modLabV[i*3],modLabV[i*3+1],modLabV[i*3+2]);
+				$('#cs_'+i).css('background-color', 'rgb('+tmpRgb[0]+','+tmpRgb[1]+','+tmpRgb[2]+')');
+			}else break;
+		}
+	}
+	modLabV[clickedColorIndex*3] = tmpLab[0];
+	modLabV[clickedColorIndex*3+1] = tmpLab[1];
+	modLabV[clickedColorIndex*3+2] = tmpLab[2];
+	/*real color change here*/
 }
 
 function calcWeight(){
