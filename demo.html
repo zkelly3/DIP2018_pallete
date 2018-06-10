@@ -14,23 +14,30 @@ function uploadimg() {
 	var reader = new FileReader();
 	reader.onloadend = function() {
 		preview.attr('src', reader.result);
-		recalcPallete();
+		$('#image').ready(recalcPallete);
 	};
 	if(file) {
 		reader.readAsDataURL(file); //reads the data as a URL
     }
 	else {
-		preview.attr('srt', "http://via.placeholder.com/640x480");
+		preview.attr('src', "");
     }
 }
-
+var demoColorPicker;
+var clickedColorID;
 function start() {
-	var demoColorPicker = new iro.ColorPicker("#color-picker-container");
+	demoColorPicker = new iro.ColorPicker("#color-picker-container");
 	demoColorPicker.on("color:change", function() {
 		var rgb = demoColorPicker.color.hexString;
-		$('#image-container').css('background-color', rgb);
+		if(clickedColorID === undefined){
+			$('#image-container').css('background-color', rgb);
+		}else{
+			$('#'+clickedColorID).css('background-color', rgb);
+		}
+		
 	});
 	$('#image-container').css('background-color', demoColorPicker.color.hexString);
+	$('#image').ready(recalcPallete);
 }
 </script>
 </head>
@@ -39,7 +46,7 @@ function start() {
 		<input type="file" id="myFile" multiple size="50" onchange="uploadimg()"></input>
 	</div>
 	<div id="content-containter">
-		<div id="image-container"><img id="image" src="http://via.placeholder.com/640x480"></div>
+		<div id="image-container"><img id="image" src=""><!-- placeholder from other domain taints the canvas --></div>
 		<div id="color-picker-container"></div>
 	</div>
 	<div>Number of colors: <input type="number" min="1" max="10" value="5" onchange="recalcPallete()"></input></div>

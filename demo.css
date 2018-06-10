@@ -19,19 +19,20 @@ div{
 	float: left;
 }
 .color_sample{
+	display: inline-block;
+	margin: 2px;
 	padding: 0px;
-	border-width: 2px;
+	border-width: 8px;
 	border-style: solid;
-	border-radius: 5px;
-	width: 40px;
-	height: 20px;
+	border-radius: 10px;
+	width: 28px;
+	height: 21px;
 	transition-duration: 0.5s;
-	background-color: #FF0000;
-	border-color: rgb(50,50,50);
+	background-color: #FFFFFF;
+	border-color: #FFFFFF;
 	box-shadow: 0px 0px 0px grey;
 }
 .color_sample:hover {
-	border-color: rgb(200,200,200);
 	transform: translateY(-3px);
-	box-shadow: 0px 3px 5px grey;
+	box-shadow: 0px 3px 8px grey;
 }
