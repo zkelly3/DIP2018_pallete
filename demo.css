@@ -5,13 +5,15 @@ div{
 }
 #upload-bar {
 	height: 50px;
+	padding: 10px;
 	width: calc(100% - 20px);
-	left: 20px;
+	position: relative;
 }
 #image-container {
 	height: 600px;
 	width: 1000px;
 	float: left;
+	border: 1px dashed black;
 }
 #color-picker-container {
 	height: 320px;
@@ -35,4 +37,33 @@ div{
 .color_sample:hover {
 	transform: translateY(-3px);
 	box-shadow: 0px 3px 8px grey;
+}
+.btn {
+	position: relative;
+	background-color: #7DB9DE;
+	color: white;
+	font-size: 15px;
+	text-align: center;
+	padding: 10px;
+	border-radius: 5px;
+	cursor: pointer;
+	display: inline-block;
+}
+.btn:hover {
+	background-color: #3A8FB7;
+}
+#uploadbtn {
+	position: relative;
+	left: 5px;
+}
+#urlinput {
+	position: relative;
+	left: 15px;
+	border-radius: 5px;
+	height: 30px;
+	padding-left: 5px;
+}
+#urlbtn {
+	position: relative;
+	left: 15px;
 }

@@ -21,9 +21,16 @@ function uploadimg() {
 		reader.readAsDataURL(file); //reads the data as a URL
     }
 	else {
-		preview.attr('src', "");
+		preview.attr('src', '');
     }
+	$('input[type=file]').val('');
 }
+function urlimg() {
+	var src = $('#urlinput').val();
+	if(src === '') $('#image').attr('src', ''); //to be checked, should we check the src
+	$('#image').attr('src', src);
+}
+
 var demoColorPicker;
 var clickedColorID;
 function start() {
@@ -45,7 +52,13 @@ function start() {
 </head>
 <body onload="start()">
 	<div id="upload-bar">
-		<input type="file" id="myFile" multiple size="50" onchange="uploadimg()"></input>
+		<label class="btn" id="uploadbtn">
+			<input type="file" id="myFile" style="display:none;" multiple size="50" onchange="uploadimg()"></input>
+			Upload
+		</label>
+		<span style="position:relative;left:10px;">or</span>
+		<input type=text id="urlinput" placeholder="Enter an URL">
+		<span class="btn" id="urlbtn" onclick="urlimg()">Confirm</span>
 	</div>
 	<div id="content-containter">
 		<div id="image-container"><img id="image" src=""><!-- placeholder from other domain taints the canvas --></div>
