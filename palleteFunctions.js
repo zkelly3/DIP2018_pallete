@@ -1,6 +1,5 @@
-var weightIsDirty = true;
 var numColors;
-//array of the weight for each color for each pixel: size is image size * numColors
+//array of the weight for each color in RGB sample points: size = 4913*numColors  (4913=17^3)
 var pixelPalleteWeight;
 //imgData.data => array of the real pixel val of the image: size is image size * 4(rgba)
 var imgData;
@@ -9,42 +8,6 @@ var kmeansLabV;
 var modLabV;
 var clickedColorIndex;
 
-function RGB2LAB(r,g,b){
-	//algorithm from https://cg2010studio.com/2012/10/02/rgb%E8%88%87cielab%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%96%93%E8%BD%89%E6%8F%9B/
-	var lab = [0,0,0];
-	var xyz = [0,0,0];
-	//rgb to xyz
-	xyz[0] = 0.412453*r+0.357580*g+0.180423*b;
-	xyz[1] = 0.212671*r+0.715160*g+0.072169*b;
-	xyz[2] = 0.019334*r+0.119193*g+0.950227*b;
-	for(var i=0; i < 3; i++){
-		xyz[i]/=255;
-	}
-	//xyz to lab
-	function f(val){
-		return (val>0.008856)? Math.pow(val,1/3):(7.787*val+16/116);
-	}
-	lab[0] = (xyz[1]>0.008856)? (116*Math.pow(xyz[1],1/3)-16):(903.3*xyz[1]);
-	lab[1] = 500*(f(xyz[0]/0.9515)-f(xyz[1]));
-	lab[2] = 200*(f(xyz[1])-f(xyz[2]/1.0886));
-	return lab;
-}
-function LAB2RGB(l,a,b){
-	var rgb = [0,0,0];
-	var xyz = [0,0,0];
-	var fxyz = [0,0,0];
-	fxyz[1] = (l+16)/116;
-	fxyz[0] = fxyz[1]+(a/500);
-	fxyz[2] = fxyz[1]-(b/200);
-	xyz[0] = (fxyz[0]>0.008856)? (0.9515*Math.pow(fxyz[0],3)):((fxyz[0]-16)/116*0.000235764675*0.9515);
-	xyz[1] = (fxyz[1]>0.008856)? (Math.pow(fxyz[1],3)):((fxyz[1]-16)/116*0.000235764675);
-	xyz[2] = (fxyz[2]>0.008856)? (1.0886*Math.pow(fxyz[2],3)):((fxyz[2]-16)/116*0.000235764675*1.0886);
-	//xyz to rgb
-	rgb[0] = Math.floor((3.24079*xyz[0]-1.53715*xyz[1]-0.498535*xyz[2])*255);
-	rgb[1] = Math.floor((-0.969256*xyz[0]+1.875992*xyz[1]+0.041556*xyz[2])*255);
-	rgb[2] = Math.floor((0.055648*xyz[0]-0.204043*xyz[1]+1.057311*xyz[2])*255);
-	return rgb;
-}
 function indexOfMax(arr) {
     if (arr.length === 0) {
         return -1;
@@ -59,7 +22,7 @@ function indexOfMax(arr) {
     }
     return maxIndex;
 }
-function sqr(x){return x*x;}
+
 function recalcPallete(){
 	var tmpNumColors = parseInt($('input[type=number]').get(0).value);
 	for(var i = tmpNumColors+1; i < numColors+1; i++){
@@ -93,8 +56,6 @@ function recalcPallete(){
 		console.log("getImageData failed, abort recalc");
 		return;
 	}
-	
-	weightIsDirty = true;
 	//the real algorithm
 	var histN = [];
 	var histV = [];
@@ -203,7 +164,7 @@ function recalcPallete(){
 			}
 		}
 		itCount++;
-	}while(kmeansConverge != true)
+	}while(kmeansConverge != true);
 	console.log("iterations until converge = "+itCount);
 	//sort according to L value
 	for(var i = 1; i < numColors+1; i++){
@@ -235,15 +196,14 @@ function recalcPallete(){
 		$('#cs_'+i).css('border-color', 'rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')');
 		$('#cs_'+i).click(clickOnColor);
 	}
+	calcWeight();
 }
 function clickOnColor(){
 	clickedColorID = $(this).attr('id');
-	demoColorPicker.color.rgbString = $(this).css('background-color');
 	clickedColorIndex = parseInt(clickedColorID.substring(3));
+	demoColorPicker.color.rgbString = $(this).css('background-color');
 }
 function modColor(){
-	if(weightIsDirty) calcWeight();
-	weightIsDirty = false;
 	var tmpLab = RGB2LAB(demoColorPicker.color.rgb.r,demoColorPicker.color.rgb.g,demoColorPicker.color.rgb.b);
 	//constraint Input
 	if(tmpLab[0] > modLabV[clickedColorIndex*3]){
