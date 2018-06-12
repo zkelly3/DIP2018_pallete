@@ -1,3 +1,7 @@
+body{
+	text-align: center;
+	background-color: #565656;
+}
 div{
 	display: block;
 	overflow: auto;
@@ -6,21 +10,24 @@ div{
 #upload-bar {
 	height: 50px;
 	padding: 10px;
-	width: calc(100% - 20px);
 	position: relative;
 }
 #image-container {
-	height: 600px;
-	width: 1000px;
-	float: left;
-	border: 1px dashed black;
+	min-height: 320px;
+	min-width: 100px;
+	width: calc(100% - 360px);
+	border: 2px dashed black;
+	display: inline-block;
+	background-color: #282828;
 }
 #color-picker-container {
 	height: 320px;
 	width: 320px;
-	float: left;
+	display: inline-block;
+	vertical-align: bottom;
 }
 .color_sample{
+	cursor: pointer;
 	display: inline-block;
 	margin: 2px;
 	padding: 0px;
@@ -30,24 +37,29 @@ div{
 	width: 28px;
 	height: 21px;
 	transition-duration: 0.2s;
-	background-color: #FFFFFF;
-	border-color: #FFFFFF;
-	box-shadow: 0px 0px 0px grey;
+	background-color: #565656;
+	border-color: #565656;
+	box-shadow: 0px 0px 0px #282828;
 }
 .color_sample:hover {
 	transform: translateY(-3px);
-	box-shadow: 0px 3px 8px grey;
+	box-shadow: 0px 3px 8px #282828;
 }
 .btn {
 	position: relative;
-	background-color: #7DB9DE;
+	background-color: #383838;
 	color: white;
 	font-size: 15px;
 	text-align: center;
 	padding: 10px;
-	border-radius: 5px;
+	padding-left: 20px;
+	padding-right: 20px;
+	border-radius: 25px;
 	cursor: pointer;
 	display: inline-block;
+	border-width: 2px;
+	border-style: solid;
+	border-color: #7DB9DE;
 }
 .btn:hover {
 	background-color: #3A8FB7;

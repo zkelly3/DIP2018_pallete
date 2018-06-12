@@ -1,14 +1,12 @@
 var numColors;
-//array of the weight for each color in RGB sample points: size = 4913*numColors  (4913=17^3)
-var pixelPalleteWeight;
 //imgData.data => array of the real pixel val of the image: size is image size * 4(rgba)
 var imgData;
 var canvas;
 var w, h;
 var kmeansLabV;
 var modLabV;
-
-
+var sigma;
+var lambda;//numColors*numColors matrix
 
 var clickedColorIndex;
 
@@ -165,6 +163,9 @@ function recalcPallete(){
 				tmpMeanLabV[i*4+3] = 0;//pixel count
 			}else{
 				console.log("exception: no pixel fit in bin "+i);
+				$('input[type=number]').get(0).value--;
+				recalcPallete();
+				return;
 			}
 		}
 		itCount++;
@@ -200,7 +201,7 @@ function recalcPallete(){
 		$('#cs_'+i).css('border-color', 'rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')');
 		$('#cs_'+i).click(clickOnColor);
 	}
-	calcWeight();
+	if(numColors>1) preCalcWeight();
 }
 function clickOnColor(){
 	clickedColorID = $(this).attr('id');
@@ -278,14 +279,29 @@ function modColor(){
 					break;
 				}
 			}
-			oriLAB = [modL,oriLAB[1],oriLAB[2]];
 			//colorPart
-			var moddedColors = [];
+			var moddedColor;
+			var weights;
+			if(numColors>1){
+				weights = calcWeightPalette(oriLAB);
+				var acculmW = 0;
+				for(var k = 0; k < numColors; k++){
+					weights[k] = (weights[k]<0)? 0:weights[k];
+					acculmW += weights[k];
+				}
+				for(var k = 0; k < numColors; k++){
+					weights[k]/=acculmW;
+				}	
+			}else weights = [1];
+			var finalColor = [modL,0,0];
 			for(var k = 1; k < numColors+1; k++){
-				moddedColors[k] = shiftColor(oriLAB, kmeansLabV.slice(k*3, k*3+3),modLabV.slice(k*3, k*3+3));
+				moddedColor = shiftColor([modL,oriLAB[1],oriLAB[2]], kmeansLabV.slice(k*3, k*3+3),modLabV.slice(k*3, k*3+3));
 				//blend according to weight
+				finalColor[1] += weights[k-1]*moddedColor[1];
+				finalColor[2] += weights[k-1]*moddedColor[2];
 			}
-			modC = LAB2RGB(modL,moddedColors[1][1],moddedColors[1][2]);
+
+			modC = LAB2RGB(modL,finalColor[1],finalColor[2]);
 			modImgData.data[4*(i*w+j)] = modC[0];
 			modImgData.data[4*(i*w+j)+1] = modC[1];
 			modImgData.data[4*(i*w+j)+2] = modC[2];
@@ -295,9 +311,51 @@ function modColor(){
 	canvas.getContext('2d').putImageData(modImgData,0,0);
 
 }
-
-function calcWeight(){
-
+function calcWeightPalette(lab){
+	ret = [];
+	for (var j = 1; j < numColors+1; j++) {
+		ret.push(calcWeight1(lab, j-1));
+	}
+	return ret;
 }
 
+function calcWeight1(lab, palleteIndex){
+	var sum = 0;
+	for (var j = 1; j < numColors+1; j++) {
+		sum += lambda[j-1][palleteIndex] * phi(Norm2(kmeansLabV.slice(j*3,j*3+3), lab));
+	}
+	return sum;
+}
+
+
+function preCalcWeight(){ //done once per palette, not on mod color
+	sigma = calcSigma();
+	lambda = calcLambda();
+}
+function calcLambda(){
+	var s = [];
+	var k = numColors + 1;
+	for (var p = 1; p < k; p++) {
+		var tmp = [];
+		for (var q = 1; q < k; q++) {
+			tmp.push(phi(Norm2(kmeansLabV.slice(p*3,p*3+3),kmeansLabV.slice(q*3,q*3+3))));
+		}
+		s.push(tmp);
+	}
+	return math.inv(s);
+}
+
+function calcSigma() {
+	var sum = 0;
+	for (var i = 1; i < numColors + 1; i++) {
+		for (var j = 1; j < numColors + 1; j++) {
+			if (i == j) continue;
+			sum += Norm2(kmeansLabV.slice(i*3,i*3+3),kmeansLabV.slice(j*3,j*3+3));
+		}
+	}
+	return sum / (numColors*(numColors-1));
+}
+function phi(r){
+	return Math.exp(-r * r / (2 * sigma * sigma));
+}
 

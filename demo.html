@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="demo.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="iro.min.js"></script>
+<script src="math.min.js"></script>
 <script src="colorFunctions.js"></script>
 <script src="palleteFunctions.js"></script>
 <script>
@@ -38,13 +39,13 @@ function start() {
 	demoColorPicker.on("color:change", function() {
 		var rgb = demoColorPicker.color.hexString;
 		if(clickedColorID === undefined){
-			$('#image-container').css('background-color', rgb);
+			//$('#image-container').css('background-color', rgb);
 		}else{
 			$('#'+clickedColorID).css('background-color', rgb);
 			modColor();
 		}
 	});
-	$('#image-container').css('background-color', demoColorPicker.color.hexString);
+	//$('#image-container').css('background-color', demoColorPicker.color.hexString);
 	$('#image').ready(recalcPallete);
 }
 </script>
@@ -53,21 +54,18 @@ function start() {
 	<div id="upload-bar">
 		<label class="btn" id="uploadbtn">
 			<input type="file" id="myFile" style="display:none;" multiple size="50" onchange="uploadimg()"></input>
-			Upload
+			Upload an Image...
 		</label>
-		<span style="position:relative;left:10px;">or</span>
-		<input type=text id="urlinput" placeholder="Enter an URL">
-		<span class="btn" id="urlbtn" onclick="urlimg()">Confirm</span>
 	</div>
 	<div id="content-containter">
 		<div id="image-container">
 			<img id="image" src="" style="display:none">
-			<canvas id="modImageCanvas" src="">
+			<canvas id="modImageCanvas">
 			<!-- img for input, canvas for the real pixel stuff and display -->
 		</div>
 		<div id="color-picker-container"></div>
 	</div>
-	<div>Number of colors: <input type="number" min="1" max="10" value="5" onchange="recalcPallete()"></input></div>
+	<div style="color: #FFFFFF;">Number of Pallete Colors: <input type="number" min="1" max="10" value="5" onchange="recalcPallete()"></input></div>
 	<div id="pallete-container"><!-- to be filled color_sample classes by js --></div>
 </body>
 </html>
