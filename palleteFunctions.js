@@ -3,9 +3,13 @@ var numColors;
 var pixelPalleteWeight;
 //imgData.data => array of the real pixel val of the image: size is image size * 4(rgba)
 var imgData;
+var canvas;
 var w, h;
 var kmeansLabV;
 var modLabV;
+
+
+
 var clickedColorIndex;
 
 function indexOfMax(arr) {
@@ -43,7 +47,7 @@ function recalcPallete(){
 	w = img.width;
 	h = img.height;
 	//copy image data to canvas
-	var canvas = document.createElement('canvas');
+	if(!canvas) canvas = document.getElementById('modImageCanvas');
 	canvas.width = w;
 	canvas.height = h;
 	var ctx = canvas.getContext('2d');
@@ -227,6 +231,62 @@ function modColor(){
 	modLabV[clickedColorIndex*3+1] = tmpLab[1];
 	modLabV[clickedColorIndex*3+2] = tmpLab[2];
 	/*real color change here*/
+	if(!(imgData)){//not valid, read again?
+		var img = document.getElementById('image');
+		w = img.width;
+		h = img.height;
+		//copy image data to canvas
+		if(!canvas) canvas = document.getElementById('modImageCanvas');
+		canvas.width = w;
+		canvas.height = h;
+		var ctx = canvas.getContext('2d');
+		
+		ctx.drawImage(img, 0, 0 );
+		try{
+			imgData = ctx.getImageData(0, 0, img.width, img.height);
+		}catch(err){
+			console.log(err.message);
+			console.log("getImageData failed, abort modColor");
+			return;
+		}
+	}
+	var modImgData = new ImageData(w, h);
+	var kmeansL = [0];
+	var kmodL = [0];
+	for(var i = 1; i < numColors+1; i++){
+		kmeansL[i] = kmeansLabV[i*3];
+		kmodL[i] = modLabV[i*3];
+	}
+	kmeansL[numColors+1] = 100;
+	kmodL[numColors+1] = 100;
+	var R,G,B;
+	for(var i = 0; i < h; i++){
+		for(var j = 0; j < w; j++){
+			R = imgData.data[4*(i*w+j)];
+			G = imgData.data[4*(i*w+j)+1];
+			B = imgData.data[4*(i*w+j)+2];
+			//lightness part
+			var oriLAB = RGB2LAB(R,G,B);
+			var modL = oriLAB[0];
+			for(var k = 0; k < numColors+1; k++){
+				if(modL >= kmeansL[k] && modL <= kmeansL[k+1]){
+					if(kmeansL[k+1]-kmeansL[k]<0.01){
+						modL = kmodL[k];
+						break;
+					}
+					modL = kmodL[k]+(kmodL[k+1]-kmodL[k])*(modL-kmeansL[k])/(kmeansL[k+1]-kmeansL[k]);
+					break;
+				}
+			}
+			modC = LAB2RGB(modL,oriLAB[1],oriLAB[2]);
+			modImgData.data[4*(i*w+j)] = modC[0];
+			modImgData.data[4*(i*w+j)+1] = modC[1];
+			modImgData.data[4*(i*w+j)+2] = modC[2];
+			modImgData.data[4*(i*w+j)+3] = 255;
+		}
+	}
+	canvas.getContext('2d').putImageData(modImgData,0,0);
+
 }
 
 function calcWeight(){
