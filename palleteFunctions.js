@@ -278,7 +278,14 @@ function modColor(){
 					break;
 				}
 			}
-			modC = LAB2RGB(modL,oriLAB[1],oriLAB[2]);
+			oriLAB = [modL,oriLAB[1],oriLAB[2]];
+			//colorPart
+			var moddedColors = [];
+			for(var k = 1; k < numColors+1; k++){
+				moddedColors[k] = shiftColor(oriLAB, kmeansLabV.slice(k*3, k*3+3),modLabV.slice(k*3, k*3+3));
+				//blend according to weight
+			}
+			modC = LAB2RGB(modL,moddedColors[1][1],moddedColors[1][2]);
 			modImgData.data[4*(i*w+j)] = modC[0];
 			modImgData.data[4*(i*w+j)+1] = modC[1];
 			modImgData.data[4*(i*w+j)+2] = modC[2];

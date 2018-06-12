@@ -37,7 +37,7 @@ function LAB2RGB(l,a,b){
 }
 function inGamut(lab){
 	rgb = LAB2RGB(lab[0],lab[1],lab[2]);
-	return r>=0&&r<=255&&g>=0&&g<=255&&b>=0&&b<=255;
+	return rgb[0]>=0&&rgb[0]<=255&&rgb[1]>=0&&rgb[1]<=255&&rgb[2]>=0&&rgb[2]<=255;
 }
 function Norm1(c1,c2){
 	return Math.abs(c1[0]-c2[0])+Math.abs(c1[1]-c2[1])+Math.abs(c1[2]-c2[2]);
@@ -46,38 +46,38 @@ function Norm2(c1,c2){
 	return Math.sqrt(sqr(c1[0]-c2[0])+sqr(c1[1]-c2[1])+sqr(c1[2]-c2[2]));
 }
 function extendOutOfGamut(lab1,lab2){
-	var l = Norm2(c1,c2);
+	var l = Norm2(lab1,lab2);
 	var mul = 1;
 	if(l<0.001){console.log('lab1,lab2 too close'); return;}
 	else if(l<20) mul = 20/l;
 	var vec = [(lab2[0]-lab1[0])*mul, (lab2[1]-lab1[1])*mul, (lab2[2]-lab1[2])*mul];
-	var ret;
+	var ret = [lab2[0]+vec[0], lab2[1]+vec[1], lab2[2]+vec[2]];
 	do{
-		ret = [lab2[0]+vec[0], lab2[1]+vec[1], lab2[2]+vec[2]];
+		ret = [ret[0]+vec[0], ret[1]+vec[1], ret[2]+vec[2]];
 	}while(inGamut(ret));
 	return ret;
 }
 function intersectGamut(lab1,lab2){
-	var mid, inC, outC, tmp;
+	var mid, inC, outC, tmp, isExtend;
 	if(inGamut(lab2)){
-		inC = lab2;
+		inC = lab2.slice(0);
 		outC = extendOutOfGamut(lab1,lab2);
+		if(!outC) return lab2;
 		mid = [(inC[0]+outC[0])/2, (inC[1]+outC[1])/2, (inC[2]+outC[2])/2];
 	}else{
 		mid = [(lab1[0]+lab2[0])/2, (lab1[1]+lab2[1])/2, (lab1[2]+lab2[2])/2];
 		if(inGamut(mid)){
-			inC = mid; outC = lab2;
+			inC = mid.slice(0); outC = lab2.slice(0);
 		}else{
-			inC = lab1; outC = mid;
+			inC = lab1.slice(0); outC = mid.slice(0);
 		}
 	}
-	
-	while(Norm1(inC,outC)<2.3){
+	while(Norm1(inC,outC)>2.3){
 		mid = [(inC[0]+outC[0])/2, (inC[1]+outC[1])/2, (inC[2]+outC[2])/2];
 		if(inGamut(mid)){
-			inC = mid; outC = lab2;
+			inC = mid.slice(0);
 		}else{
-			inC = lab1; outC = mid;
+			outC = mid.slice(0);
 		}
 	}
 	return inC;
@@ -87,7 +87,17 @@ function shiftColor(labTarget, lab1, lab2){
 	if(Norm1(labTarget,lab1)<2.3) return lab2;
 	/*to be implemented*/
 	var vec = [lab2[0]-lab1[0], lab2[1]-lab1[1], lab2[2]-lab1[2]];
-	return ret = [labTarget[0]+vec[0], labTarget[1]+vec[1], labTarget[2]+vec[2]];;
+	var x0 = [labTarget[0]+vec[0], labTarget[1]+vec[1], labTarget[2]+vec[2]];
+	var xb;
+	if(inGamut(x0)){
+		xb = intersectGamut(labTarget, x0);
+	}else{
+		xb = intersectGamut(lab2, x0);
+	}
+	var cb = intersectGamut(lab1, lab2); //maybe store this?
+	var tmp = Norm2(xb,labTarget)/Norm2(cb,lab1);
+	tmp = ((tmp<1)? tmp:1)*Norm2(lab2,lab1)/Norm2(xb,labTarget);
+	return [labTarget[0]+(xb[0]-labTarget[0])*tmp,labTarget[1]+(xb[1]-labTarget[1])*tmp,labTarget[2]+(xb[2]-labTarget[2])*tmp];
 }
 
 

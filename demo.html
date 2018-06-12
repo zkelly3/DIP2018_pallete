@@ -43,7 +43,6 @@ function start() {
 			$('#'+clickedColorID).css('background-color', rgb);
 			modColor();
 		}
-		
 	});
 	$('#image-container').css('background-color', demoColorPicker.color.hexString);
 	$('#image').ready(recalcPallete);
@@ -61,8 +60,11 @@ function start() {
 		<span class="btn" id="urlbtn" onclick="urlimg()">Confirm</span>
 	</div>
 	<div id="content-containter">
-		<div id="image-container"><img id="image" src=""><!-- placeholder from other domain taints the canvas -->
-			<canvas id="modImageCanvas" src=""></div>
+		<div id="image-container">
+			<img id="image" src="" style="display:none">
+			<canvas id="modImageCanvas" src="">
+			<!-- img for input, canvas for the real pixel stuff and display -->
+		</div>
 		<div id="color-picker-container"></div>
 	</div>
 	<div>Number of colors: <input type="number" min="1" max="10" value="5" onchange="recalcPallete()"></input></div>
